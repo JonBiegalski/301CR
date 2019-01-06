@@ -1,0 +1,8 @@
+﻿  engine.cpp
+d:\pulpit\school\301cr\301cr game\framework\framework\engine.cpp(231): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 1 has type 'void *'
+d:\pulpit\school\301cr\301cr game\framework\framework\engine.cpp(267): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+d:\pulpit\school\301cr\301cr game\framework\framework\engine.cpp(287): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+d:\pulpit\school\301cr\301cr game\framework\framework\engine.cpp(306): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+d:\pulpit\school\301cr\301cr game\framework\framework\engine.cpp(331): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+d:\pulpit\school\301cr\301cr game\framework\framework\engine.cpp(361): warning C4244: 'argument': conversion from 'unsigned int' to 'float', possible loss of data
+  Framework.vcxproj -> D:\PULPIT\School\301CR\301CR Game\Framework\x64\Debug\Framework.exe
