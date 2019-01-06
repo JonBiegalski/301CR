@@ -115,17 +115,29 @@ int main()
 	if (ishost == 'Y')
 	{
 		host = true;
-		std::cout << "Your controls:\n WSAD and J to shoot\n";
+		std::cout << "Your controls:\nWSAD and J to shoot\n";
 	}
 	else
 	{
 		host = false;
-		std::cout << "Your controls:\n Arrow Keys and Space to shoot\n";
+		std::cout << "Your controls:\nArrow Keys and Space to shoot\n";
 	}
+	std::cout << "Update rate (between 1 and 60): ";
+	int x;
+	std::cin >> x;
 
 	GameState* game_state = new GameState(SCREEN_X, SCREEN_Y, "GAME!", host);
 	EventQueue event_queue();
+	if (x == 60)
+	{
+		game_state->packet_timer_max = 0;
+	}
+	else
+	{
+		game_state->packet_timer_max = 60 / x;
 
+	}
+	game_state->packet_timer = game_state->packet_timer_max;
 	std::cout << "Main start" << std::endl;;
 	LoadInTextures(game_state);
 	game_state->bg.setPosition(0, 0);

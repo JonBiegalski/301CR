@@ -130,6 +130,8 @@ public:
 	bool is_host;
 	bool game_running;
 	std::string level_name;
+	int packet_timer;
+	int packet_timer_max;
 	ENetAddress address;
 	ENetHost * host;
 	ENetEvent event;

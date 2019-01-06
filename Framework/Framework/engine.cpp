@@ -488,115 +488,123 @@ void GameState::Update()
 	CheckForCollisions();
 	if (game_running && player_list.size()>1)
 	{
-
-		if (is_host)
+		if(packet_timer>0)
 		{
-
-			while (enet_host_service(host, &event, 0) > 0)
-			{
-				switch (event.type)
-				{
-				case ENET_EVENT_TYPE_CONNECT:
-
-					std::cout << "A client connected from address " << event.peer->address.host << ":" << event.peer->address.port << ".\n";
-
-					/* This event type has an associated peer: the client which has
-					connected to the server. We can store some data about this peer
-					for as long as it remains in scope using the "data" variable. */
-
-					event.peer->data = "This is a client";
-
-					break;
-				case ENET_EVENT_TYPE_DISCONNECT:
-					std::cout << "The client from address " << event.peer->address.host << ":" << event.peer->address.port << " disconnected \n";
-
-					event.peer->data = NULL;
-
-					break;
-				case ENET_EVENT_TYPE_RECEIVE:
-					//std::cout << "Packet received!\n";
-					if (event.packet->dataLength == sizeof(PlayerPacket))
-					{
-
-						PlayerPacket y;
-						//Player x;
-						memcpy(&y, event.packet->data, event.packet->dataLength);
-						//player_list[1].col = x.col;
-						player_list[1].position = y.pos;
-						////player_list[1].SetPosition(x.position);
-						player_list[1].direction = y.dir;
-						player_list[1].shooting_direction = y.shoot_dir;
-						player_list[1].has_shot = y.is_shooting;
-						if (player_list[1].has_shot)
-						{
-
-							std::vector<Player*> v;
-							v.push_back(&player_list[1]);
-							Event x("BulletSpawn", Event::GameState, v);
-							EventQueue& event_q = EventQueue::getInstance();
-							event_q.event_queue.push_back(x);
-						}
-					}
-					break;
-				}
-			}
-
-			PlayerPacket pack(player_list[0].position,player_list[0].direction,player_list[0].shooting_direction, player_list[0].has_shot);
-			packet = enet_packet_create(&pack, sizeof(PlayerPacket), ENET_PACKET_FLAG_RELIABLE);
-			//packet = enet_packet_create(&player_list[0], sizeof(Player), ENET_PACKET_FLAG_RELIABLE);
-			enet_host_broadcast(host, 0, packet);
-
+			packet_timer--;
 		}
 		else
 		{
-			while (enet_host_service(host, &event, 0) > 0)
+			if (is_host)
 			{
-				switch (event.type)
+
+				while (enet_host_service(host, &event, 0) > 0)
 				{
-				case ENET_EVENT_TYPE_DISCONNECT:
-					std::cout << "The client from address " << event.peer->address.host << ":" << event.peer->address.port << " disconnected \n";
-
-					event.peer->data = NULL;
-
-					break;
-				case ENET_EVENT_TYPE_RECEIVE:
-					//std::cout << "Packet received!\n";
-					if (event.packet->dataLength==sizeof(PlayerPacket))
+					switch (event.type)
 					{
+					case ENET_EVENT_TYPE_CONNECT:
 
-						PlayerPacket x;
-						//Player x;
-						memcpy(&x, event.packet->data, event.packet->dataLength);
-						//player_list[0].col = x.col;
-						player_list[0].position = x.pos;
-						////player_list[0].SetPosition(x.position);
-						player_list[0].direction = x.dir;
-						player_list[0].shooting_direction = x.shoot_dir;
-						player_list[0].has_shot = x.is_shooting;
-						////player_list[0].direction = x.dir;
-						if (player_list[0].has_shot)
+						std::cout << "A client connected from address " << event.peer->address.host << ":" << event.peer->address.port << ".\n";
+
+						/* This event type has an associated peer: the client which has
+						connected to the server. We can store some data about this peer
+						for as long as it remains in scope using the "data" variable. */
+
+						event.peer->data = "This is a client";
+
+						break;
+					case ENET_EVENT_TYPE_DISCONNECT:
+						std::cout << "The client from address " << event.peer->address.host << ":" << event.peer->address.port << " disconnected \n";
+
+						event.peer->data = NULL;
+
+						break;
+					case ENET_EVENT_TYPE_RECEIVE:
+						//std::cout << "Packet received!\n";
+						if (event.packet->dataLength == sizeof(PlayerPacket))
 						{
 
-							std::vector<Player*> v;
-							v.push_back(&player_list[0]);
-							Event x("BulletSpawn", Event::GameState, v);
-							EventQueue& event_q = EventQueue::getInstance();
-							event_q.event_queue.push_back(x);
-							player_list[0].has_shot = false;
+							PlayerPacket y;
+							//Player x;
+							memcpy(&y, event.packet->data, event.packet->dataLength);
+							//player_list[1].col = x.col;
+							player_list[1].position = (y.pos + player_list[1].position)/2.0f;
+							////player_list[1].SetPosition(x.position);
+							player_list[1].direction = (y.dir+player_list[1].direction)/2.0f;
+							player_list[1].shooting_direction = y.shoot_dir;
+							player_list[1].has_shot = y.is_shooting;
+							if (player_list[1].has_shot)
+							{
+
+								std::vector<Player*> v;
+								v.push_back(&player_list[1]);
+								Event x("BulletSpawn", Event::GameState, v);
+								EventQueue& event_q = EventQueue::getInstance();
+								event_q.event_queue.push_back(x);
+							}
 						}
+						break;
 					}
-
-
-					break;
 				}
+
+				PlayerPacket pack(player_list[0].position, player_list[0].direction, player_list[0].shooting_direction, player_list[0].has_shot);
+				packet = enet_packet_create(&pack, sizeof(PlayerPacket), ENET_PACKET_FLAG_RELIABLE);
+				//packet = enet_packet_create(&player_list[0], sizeof(Player), ENET_PACKET_FLAG_RELIABLE);
+				enet_host_broadcast(host, 0, packet);
+
 			}
-			PlayerPacket pack(player_list[1].position,player_list[1].direction, player_list[1].shooting_direction, player_list[1].has_shot);
-			packet = enet_packet_create(&pack, sizeof(PlayerPacket), ENET_PACKET_FLAG_RELIABLE);
+			else
+			{
+				while (enet_host_service(host, &event, 0) > 0)
+				{
+					switch (event.type)
+					{
+					case ENET_EVENT_TYPE_DISCONNECT:
+						std::cout << "The client from address " << event.peer->address.host << ":" << event.peer->address.port << " disconnected \n";
 
-			//packet = enet_packet_create(&player_list[1], sizeof(Player), ENET_PACKET_FLAG_RELIABLE);
-			enet_host_broadcast(host, 0, packet);
+						event.peer->data = NULL;
 
+						break;
+					case ENET_EVENT_TYPE_RECEIVE:
+						//std::cout << "Packet received!\n";
+						if (event.packet->dataLength == sizeof(PlayerPacket))
+						{
+
+							PlayerPacket x;
+							//Player x;
+							memcpy(&x, event.packet->data, event.packet->dataLength);
+							//player_list[0].col = x.col;
+							player_list[0].position = (x.pos + player_list[0].position) / 2.0f;
+							////player_list[1].SetPosition(x.position);
+							player_list[0].direction = (x.dir + player_list[0].direction) / 2.0f;
+							player_list[0].shooting_direction = x.shoot_dir;
+							player_list[0].has_shot = x.is_shooting;
+							////player_list[0].direction = x.dir;
+							if (player_list[0].has_shot)
+							{
+
+								std::vector<Player*> v;
+								v.push_back(&player_list[0]);
+								Event x("BulletSpawn", Event::GameState, v);
+								EventQueue& event_q = EventQueue::getInstance();
+								event_q.event_queue.push_back(x);
+								player_list[0].has_shot = false;
+							}
+						}
+
+
+						break;
+					}
+				}
+				PlayerPacket pack(player_list[1].position, player_list[1].direction, player_list[1].shooting_direction, player_list[1].has_shot);
+				packet = enet_packet_create(&pack, sizeof(PlayerPacket), ENET_PACKET_FLAG_RELIABLE);
+
+				//packet = enet_packet_create(&player_list[1], sizeof(Player), ENET_PACKET_FLAG_RELIABLE);
+				enet_host_broadcast(host, 0, packet);
+
+			}
+			packet_timer = packet_timer_max;
 		}
+		
 	}
 	
 	game_window.display();
